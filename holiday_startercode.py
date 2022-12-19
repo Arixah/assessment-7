@@ -3,125 +3,222 @@ import json
 from bs4 import BeautifulSoup
 import requests
 from dataclasses import dataclass
+import os
 
-
-# -------------------------------------------
-# Modify the holiday class to 
-# 1. Only accept Datetime objects for date.
-# 2. You may need to add additional functions
-# 3. You may drop the init if you are using @dataclasses
-# --------------------------------------------
-class Holiday:
-      
-    def __init__(self,name, date):
-        #Your Code Here        
+class Holiday:   
+    def __init__(self, name, date):
+        self.name = name
+        self.date = date   
         pass
+
     def __str__ (self):
-        # String output
-        # Holiday output when printed.
-        pass #put a pass after each def
+        return str(self.name) + ', ' + str(self.date)
+    #pass
            
-# -------------------------------------------
-# The HolidayList class acts as a wrapper and container
-# For the list of holidays
-# Each method has pseudo-code instructions
-# --------------------------------------------
 class HolidayList:
     def __init__(self):
        self.innerHolidays = []
    
-    def addHoliday(holidayObj):
-        # Make sure holidayObj is an Holiday Object by checking the type
-        # Use innerHolidays.append(holidayObj) to add holiday
-        # print to the user that you added a holiday
+    def addHoliday(self, holidayObj):
+        if type(holidayObj) == Holiday:
+            self.innerHolidays.append(holidayObj)
+            print(str(holidayObj) + 'has been added to the holiday list.')
+        else:
+            print('Invalid date. Please try again.')
 
-    def findHoliday(HolidayName, Date):
-        # Find Holiday in innerHolidays
-        # Return Holiday
+    def findHoliday(self, HolidayName, Date):
+        for inner in self.innerHolidays:
+            if inner in self.innerHolidays:
+                if type(inner) == Holiday:
+                    if inner.name == HolidayName and inner.Date == Date:
+                        return inner
+                    pass
+                pass
+            pass #maybe add some flavor here
 
-    def removeHoliday(HolidayName, Date):
-        # Find Holiday in innerHolidays by searching the name and date combination.
-        # remove the Holiday from innerHolidays
-        # inform user you deleted the holiday
+    def removeHoliday(self, HolidayName, date):
+        remove = True
+        for i in self.innerHolidays:
+            if type(i) == Holiday:
+                if i.name == HolidayName and i.date == date:
+                    self.innerHolidays.remove(i)
+                    print(str(i) + ' has been removed from the holiday list.')
+                    remove = False
+        if remove:
+            print(str(i) + ' not found.')
 
-    def read_json(filelocation):
-        # Read in things from json file location
-        # Use addHoliday function to add holidays to inner list.
+    def read_json(self, filelocation):
+        try:
+            with open(filelocation, 'r') as f:
+                jason = json.load(f)
+            for i in jason['Holidays']:
+                self.addHoliday(Holiday(i['Name'], str(i['Date'])))
+        except:
+            print('Error 404')
 
-    def save_to_json(filelocation):
-        # Write out json file to selected file.
+    def save_to_json(self, filelocation):
+        try:
+            liblist = []
+            lib = {}
+            for i in self.innerHolidays:
+                liblist.append({'Name': i.name, 'Date': i.date})
+            lib.update({'Holidays':liblist})
+            with open(filelocation, 'w') as f:
+                json.dump(lib, f, indent = 4)
+        except:
+            print('There was an error. Please contact the IT department.')
         
-    def scrapeHolidays():
+  #  def scrapeHolidays():
         # Scrape Holidays from https://www.timeanddate.com/holidays/us/ 
         # Remember, 2 previous years, current year, and 2  years into the future. You can scrape multiple years by adding year to the timeanddate URL. For example https://www.timeanddate.com/holidays/us/2022
         # Check to see if name and date of holiday is in innerHolidays array
         # Add non-duplicates to innerHolidays
         # Handle any exceptions.     
+        #ohlawd
 
-    def numHolidays():
-        # Return the total number of holidays in innerHolidays
+    def numHolidays(self):
+        return len(self.innerHolidays)
     
-    def filter_holidays_by_week(year, week_number):
-        # Use a Lambda function to filter by week number and save this as holidays, use the filter on innerHolidays
-        # Week number is part of the the Datetime object
-        # Cast filter results as list
-        # return your holidays
+    def filter_holidays_by_week(self, year, week_number):
+        holidayweek = []
+        test = lambda date: date if datetime.date(date.year, date.month, date.day).isocalendar()[1] == week_number else False
+        for i in self.innerHolidays:
+            date = datetime.date(int(i.date[:4]), int(i.date[5:7]), int(i.date[8.10]))
+            if date.year == year:
+                if test(date) != False:
+                    holidayweek.append(i)
+        return holidayweek
 
-    def displayHolidaysInWeek(holidayList):
-        # Use your filter_holidays_by_week to get list of holidays within a week as a parameter
-        # Output formated holidays in the week. 
-        # * Remember to use the holiday __str__ method.
+    def displayHolidaysInWeek(self, week, year, holidayList):
+        holidayList = self.filter_holidays_by_week(year, week)
+        if len(holidayList) == 0:
+            print('Nothing found')
+        else:
+            for i in holidayList:
+                print(i)
+        def __str__():
+            strang = ''
+            for i in holidayList:
+                strang += str(i) + '\n'
+            return strang
 
-    def getWeather(weekNum):
+    #def getWeather(weekNum):
         # Convert weekNum to range between two days
         # Use Try / Except to catch problems
         # Query API for weather in that week range
         # Format weather information and return weather string.
 
-    def viewCurrentWeek():
-        # Use the Datetime Module to look up current week and year
-        # Use your filter_holidays_by_week function to get the list of holidays 
-        # for the current week/year
-        # Use your displayHolidaysInWeek function to display the holidays in the week
+    def viewCurrentWeek(self):
         # Ask user if they want to get the weather
         # If yes, use your getWeather function and display results
+        currentweek = datetime.date.today().isocalendar().week
+        currentyear = datetime.date.today().year
+        leest = self.filter_holidays_by_week(currentyear, currentweek)
 
-
+        frontendstuff = input('Wanna get the weather? Input y for yes and n for no.')
+        if frontendstuff.lower().strip() == 'n':
+            print('Weather function has not been implemented yet.')
+        else:
+            self.displayHolidaysInWeek(leest, currentweek, currentyear)
+        def __str__():
+            strang = ''
+            for i in leest:
+                strang += str(i) + '\n'
+            return strang
 
 def main():
-    # Large Pseudo Code steps
-    # -------------------------------------
-    # 1. Initialize HolidayList Object
-    # 2. Load JSON file via HolidayList read_json function
-    # 3. Scrape additional holidays using your HolidayList scrapeHolidays function.
-    # 3. Create while loop for user to keep adding or working with the Calender
-    # 4. Display User Menu (Print the menu)
-    # 5. Take user input for their action based on Menu and check the user input for errors
-    # 6. Run appropriate method from the HolidayList object depending on what the user input is
-    # 7. Ask the User if they would like to Continue, if not, end the while loop, ending the program.  If they do wish to continue, keep the program going. 
+        hollandaise = HolidayList()
+        sauce = os.path.dirname(os.path.abspath(__file__)) + '/holidays.json'
+        hollandaise.read_json('sauce')
+        hollandaise.scrapeHolidays()
+        unsaved = 0
 
+        print('Holiday Management \n \n')
+        print('There are ' + str(hollandaise.numHolidays()) + ' holidays stored in the system.')
+
+        menu = True
+        while(menu):
+            print('Holiday Menu \n \n')
+            print('1. Add a Holiday')
+            print('2. Remove a Holiday')
+            print('3. Save Holiday List')
+            print('4. View Holidays')
+            print('5. Exit')
+
+            choice = input('Input a number to correspond with your choice:\n')
+            if choice.strip() == '1':
+                addholi = input("Input holiday name: ")
+                tester = True
+                while(tester):
+                    dateYear = input("Input date year: ")
+                    dateMonth = input("Input date month: ")
+                    dateDay = input("Input date day: ")
+                    try:
+                        date = datetime.date(int(dateYear), int(dateMonth), int(dateDay))
+                        tester = False
+                        hollandaise.addHoliday(Holiday(addholi, str(date)))
+                        unsaved += 1
+                    except:
+                        print("Invalid date. Please try again.")
+
+            elif choice.strip() == '2':
+                removeholi = input("Input name of holiday to remove: ")
+                tester = True
+                while(tester):
+                    y = input("Input date year: ")
+                    m = input("Input date month: ")
+                    d = input("Input date day: ")
+                    try:
+                        date = datetime.date(int(dateYear), int(dateMonth), int(dateDay))
+                        tester = False
+                        hollandaise.removeHoliday(removeholi, str(date))
+                        unsaved += 1
+                    except:    
+                        print(str(removeholi) + ' not found.')
+
+            elif choice.strip() == '3':
+                saveholi = input('Are you sure you want to save your changes? [y/n]: ')
+                if saveholi.lower().strip() == 'y':  
+                    hollandaise.save_to_json(sauce)
+                    print('Your changes have been saved.')
+                    unsaved = 0
+                else:
+                    print('Holiday list file save canceled.')
+
+            elif choice.strip() == '4':
+                tester = True
+                while(tester):
+                    year = input('Which year?: ')
+                    try:
+                        year = int(year)
+                        tester = False
+                    except:
+                        print('Invalid input.')
+                tester = True
+                while(tester):   
+                    week = input('Which week? #[1 - 52, leave blank for current week]: ')
+                    if week == None or week == '':
+                        tester = False
+                        hollandaise.viewCurrentWeek()
+                    else:
+                        try:
+                            week = int(week)
+                            hollandaise.displayHolidaysInWeek(hollandaise, week, year)
+                            tester = False
+                        except:
+                            print('Something went wrong. Try again.')
+
+            elif choice.strip() == '5':
+                exit = input('Are you sure you want to exit?\nYour changes will be lost.\n [y/n]: ')
+                if exit.strip().lower()[:1] == 'y':   
+                    if unsaved != 0:
+                            print('Goodbye!')
+                            menu = False
+                    else:
+                        print('Goodbye!')
+                        menu = False
+                else:
+                    print('Something went wrong. Try again.') 
 
 if __name__ == "__main__":
     main();
-
-
-# Additional Hints:
-# ---------------------------------------------
-# You may need additional helper functions both in and out of the classes, add functions as you need to.
-#
-# No one function should be more then 50 lines of code, if you need more then 50 lines of code
-# excluding comments, break the function into multiple functions.
-#
-# You can store your raw menu text, and other blocks of texts as raw text files 
-# and use placeholder values with the format option.
-# Example:
-# In the file test.txt is "My name is {fname}, I'm {age}"
-# Then you later can read the file into a string "filetxt"
-# and substitute the placeholders 
-# for example: filetxt.format(fname = "John", age = 36)
-# This will make your code far more readable, by seperating text from code.
-
-
-
-
-
