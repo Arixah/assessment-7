@@ -1,19 +1,19 @@
 import datetime
+from datetime import datetime
 import json
 from bs4 import BeautifulSoup
 import requests
 from dataclasses import dataclass
 import os
+import re
 
 class Holiday:   
     def __init__(self, name, date):
         self.name = name
         self.date = date   
-        pass
 
     def __str__ (self):
         return str(self.name) + ', ' + str(self.date)
-    #pass
            
 class HolidayList:
     def __init__(self):
@@ -48,8 +48,9 @@ class HolidayList:
             print(str(i) + ' not found.')
 
     def read_json(self, filelocation):
+        #filelocation = 'holidays.json'
         try:
-            with open(filelocation, 'r') as f:
+            with open('holidays.json', 'r') as f:
                 jason = json.load(f)
             for i in jason['Holidays']:
                 self.addHoliday(Holiday(i['Name'], str(i['Date'])))
@@ -67,14 +68,28 @@ class HolidayList:
                 json.dump(lib, f, indent = 4)
         except:
             print('There was an error. Please contact the IT department.')
+
+    #ef conversion(self)
         
-  #  def scrapeHolidays():
-        # Scrape Holidays from https://www.timeanddate.com/holidays/us/ 
-        # Remember, 2 previous years, current year, and 2  years into the future. You can scrape multiple years by adding year to the timeanddate URL. For example https://www.timeanddate.com/holidays/us/2022
-        # Check to see if name and date of holiday is in innerHolidays array
-        # Add non-duplicates to innerHolidays
-        # Handle any exceptions.     
-        #ohlawd
+    def scrapeHolidays(self):
+        years = [2020, 2021, 2022, 2023, 2024]
+        url = 'https://www.timeanddate.com/holidays/us/'
+        try:
+            for i in range(len(years)):
+                j = requests.get(url + str(years[i]))
+                soup = BeautifulSoup(page.content, 'html.parser')
+                findall = soup.find_all('tr', id = re.compile('^tr'))
+                last = ''
+                for k in findall:
+                    if last != k.find('a').text:
+                        name = k.find('a').text
+                        date1 = k.find('the', {'class':'nw'}).text
+                        date2 = self.convertDateStringToDateObject(str(date1), years[i])
+                        #date2 = self.
+                        self.innerHolidays.append(Holiday(name, str(date2)))
+                    last = i.find('a').text
+        except:
+            print('Error 404')    
 
     def numHolidays(self):
         return len(self.innerHolidays)
@@ -111,10 +126,10 @@ class HolidayList:
     def viewCurrentWeek(self):
         # Ask user if they want to get the weather
         # If yes, use your getWeather function and display results
+
         currentweek = datetime.date.today().isocalendar().week
         currentyear = datetime.date.today().year
         leest = self.filter_holidays_by_week(currentyear, currentweek)
-
         frontendstuff = input('Wanna get the weather? Input y for yes and n for no.')
         if frontendstuff.lower().strip() == 'n':
             print('Weather function has not been implemented yet.')
@@ -133,12 +148,12 @@ def main():
         hollandaise.scrapeHolidays()
         unsaved = 0
 
-        print('Holiday Management \n \n')
+        print('Holiday Management \n')
         print('There are ' + str(hollandaise.numHolidays()) + ' holidays stored in the system.')
 
         menu = True
         while(menu):
-            print('Holiday Menu \n \n')
+            print('Holiday Menu \n')
             print('1. Add a Holiday')
             print('2. Remove a Holiday')
             print('3. Save Holiday List')
